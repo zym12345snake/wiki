@@ -1,0 +1,2 @@
+# wiki
+YM OI Wiki
