@@ -802,6 +802,71 @@
 			border: 1px solid rgba(0, 0, 0, 0.1);
 		}
 
+		.warning-modal {
+            pointer-events: auto;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7));
+            transition: opacity 0.3s ease;
+        }
+
+        .warning-modal-content {
+            pointer-events: auto;
+            background-color: rgba(255, 255, 255, 0.9);
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease-out forwards;
+            transition: transform 0.3s ease;
+            transform: scale(0.9);
+        }
+
+        .warning-modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .warning-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .warning-modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .warning-close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .warning-modal-body {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
 		/* 模态框样式 */
 		.modal {
 			display: none;
@@ -1686,6 +1751,21 @@
 	</style>
 
 	<style>
+		.warning-message {
+			text-align: center;
+			padding: 20px;
+			font-size: 18px;
+			font-weight: bold;
+			color: #d9534f;
+		}
+
+		.warning-message i {
+			margin-right: 10px;
+			font-size: 24px;
+		}
+	</style>
+
+	<style>
 		/*黑幕*/
 
 		.heimu,
@@ -1988,7 +2068,149 @@
 		window.myloader = { show: showLoader, hide: fadeOutLoader };
 	</script>
 
-	<script src="https://api.vvhan.com/api/script/bolang"></script>
+	<!-- 安全设置 -->
+	<script>
+		// 在安全设置脚本中添加计数器
+		const MAX_WARNINGS = 3;
+		let warningCount = parseInt(localStorage.getItem('warningCount')) || 0;
+
+		document.body.onselectstart = document.body.ondrag = function () { return false; }
+
+		// 禁止右键菜单
+		document.addEventListener('contextmenu', function (e) {
+			e.preventDefault();
+		});
+
+		// 禁止F12和Ctrl+Shift+I
+		document.addEventListener('keydown', function (e) {
+			if (e.key === 'F12' ||
+				(e.ctrlKey && e.shiftKey && e.key === 'I') ||
+				(e.ctrlKey && e.shiftKey && e.key === 'J') ||
+				(e.ctrlKey && e.key === 'U')) {
+				e.preventDefault();
+			}
+		});
+
+		// 添加禁止查看源代码的代码
+		document.onkeydown = function (e) {
+			if (e.keyCode == 123) { // F12
+				return false;
+				showWarningModal('f12');
+			}
+			if (e.ctrlKey && e.shiftKey && e.keyCode == 73) { // Ctrl+Shift+I
+				return false;
+				showWarningModal('ctrl');
+			}
+			if (e.ctrlKey && e.shiftKey && e.keyCode == 74) { // Ctrl+Shift+J
+				return false;
+				showWarningModal('ctrl');
+			}
+			if (e.ctrlKey && e.keyCode == 85) { // Ctrl+U
+				return false;
+				showWarningModal('ctrl');
+			}
+		}
+
+		// 在DOMContentLoaded事件监听器中添加按键检测
+		document.addEventListener('keydown', function (e) {
+			// 检测F12键
+			if (e.key === 'F12') {
+				e.preventDefault();
+				showWarningModal('f12');
+			}
+			// 检测Ctrl键但不增加计数器
+			else if (e.ctrlKey) {
+				e.preventDefault();
+				showWarningModal('ctrl');
+			}
+		});
+
+		// 显示警告模态框
+		function showWarningModal(type) {
+			// 只有F12触发时才增加计数器
+			if (type === 'f12') {
+				warningCount++;
+				localStorage.setItem('warningCount', warningCount);
+			}
+
+			if (warningCount > MAX_WARNINGS) {
+				// 超过5次警告，禁用服务
+				document.body.innerHTML = `
+            <div style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                z-index: 999999;
+                font-family: Arial, sans-serif;
+                text-align: center;
+            ">
+                <h1 style="color: #d9534f; font-size: 2.5em;">
+                    <i class="fas fa-ban"></i> 服务已被禁用
+                </h1>
+                <p style="font-size: 1.2em; margin-top: 20px;">
+                    您已多次尝试查看源代码/控制台，服务已被禁用。
+                </p>
+                <p style="margin-top: 10px;">
+                    请不要再尝试查看源代码。
+                </p>
+            </div>
+        `;
+				return;
+			}
+
+			const modal = document.getElementById(`${type}-warning-modal`);
+			modal.style.display = 'flex';
+			setTimeout(() => {
+				modal.classList.add('show');
+			}, 10);
+
+			// 3秒后自动关闭
+			setTimeout(() => {
+				modal.classList.remove('show');
+				setTimeout(() => {
+					modal.style.display = 'none';
+				}, 300);
+			}, 3000);
+		}
+	</script>
+
+	<div class="warning-modal" id="f12-warning-modal">
+		<div class="warning-modal-content">
+			<div class="warning-modal-header">
+				<div class="warning-modal-title">
+					<i class="fas fa-exclamation-triangle"></i> 警告
+				</div>
+			</div>
+			<div class="warning-modal-body">
+				<div class="warning-message">
+					<i class="fas fa-ban"></i> 不许打开控制台欧！
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="warning-modal" id="ctrl-warning-modal">
+		<div class="warning-modal-content">
+			<div class="warning-modal-header">
+				<div class="warning-modal-title">
+					<i class="fas fa-exclamation-triangle"></i> 警告
+				</div>
+			</div>
+			<div class="warning-modal-body">
+				<div class="warning-message">
+					<i class="fas fa-ban"></i> 想干什么？不许查看源代码欧！
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div class="topbar">
 		<div class="title">YM OI Wiki</div>
 
@@ -2015,7 +2237,7 @@
 	<!-- 开发者模式模态框 -->
 	<div class="modal-overlay" id="modalOverlay"></div>
 	<div class="developer-modal" id="developerModal">
-		<h3>开发者模式</h3>
+		<h3><i class="fas fa-code"></i> 开发者模式</h3>
 		<p>请输入开发者密码：</p>
 		<input type="password" id="developerInput" placeholder="输入密码">
 		<button id="developerSubmit">提交</button>
@@ -2482,7 +2704,7 @@ int main()
 		<script src="https://giscus.app/client.js" data-repo="zym12345snake/wiki" data-repo-id="R_kgDOOhnuNw"
 			data-category="General" data-category-id="DIC_kwDOOhnuN84CpljH" data-mapping="title" data-strict="0"
 			data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top"
-			data-theme="preferred_color_scheme" data-lang="zh-CN" data-loading="lazy" crossorigin="anonymous" async>
+			data-theme="preferred_color_scheme" data-lang="zh-CN" crossorigin="anonymous" async>
 			</script>
 		<div class="footer">
 			<p>© 2025 YM OI Wiki 纯前端实现 | 遵循 CC BY-SA 4.0 协议</p>
@@ -2524,17 +2746,19 @@ int main()
 
 	<!-- 更新日志模态框 -->
 	<div class="modal" id="updateLogModal">
-		<h3>更新日志</h3>
+		<h3><i class="fas fa-history"></i> 更新日志</h3>
 		<div class="modal-content" id="updateLogContent">
-			加载更新日志中...
+			<div class="loading-spinner"></div>
+			<p style="text-align: center;">加载更新日志中...</p>
 		</div>
 	</div>
 
 	<!-- 今日书摘模态框 -->
 	<div class="modal" id="bookQuoteModal">
-		<h3>今日书摘</h3>
+		<h3><i class="fas fa-book"></i> 每日书摘</h3>
 		<div class="modal-content" id="bookQuoteContent">
-			加载今日书摘中...
+			<div class="loading-spinner"></div>
+			<p style="text-align: center;">加载书摘中...</p>
 		</div>
 	</div>
 
@@ -2549,7 +2773,7 @@ int main()
 
 	<!-- 星座运势模态框 -->
 	<div class="modal" id="horoscopeModal">
-		<h3>星座运势</h3>
+		<h3><i class="fas fa-star"></i> 星座运势</h3>
 		<table>
 			<tr>
 				<th><strong>星座名</strong></th>
@@ -3131,6 +3355,37 @@ int main()
 	<script>
 		// 简单的菜单激活逻辑
 		document.addEventListener('DOMContentLoaded', function () {
+			// 检查警告次数
+			if (warningCount > MAX_WARNINGS) {
+				document.body.innerHTML = `
+            <div style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                z-index: 999999;
+                font-family: Arial, sans-serif;
+                text-align: center;
+            ">
+                <h1 style="color: #d9534f; font-size: 2.5em;">
+                    <i class="fas fa-ban"></i> 服务已被禁用
+                </h1>
+                <p style="font-size: 1.2em; margin-top: 20px;">
+                    您已多次尝试查看源代码/控制台，服务已被禁用。
+                </p>
+                <p style="margin-top: 10px;">
+                    请不要再尝试查看源代码。
+                </p>
+            </div>
+        `;
+				return;
+			}
 			const menuLinks = document.querySelectorAll('.menu-link');
 			const sections = Array.from(document.querySelectorAll('h1, h2'));
 			const menuItems = document.querySelectorAll('.menu-item.has-children');
