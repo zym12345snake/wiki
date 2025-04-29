@@ -884,6 +884,170 @@
 			color: var(--theme-color);
 			margin-right: 5px;
 		}
+
+		/* 天气模态框样式 */
+		.weather-modal {
+			display: none;
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background: var(--bg-color);
+			padding: 20px;
+			border-radius: 10px;
+			box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+			z-index: 2000;
+			width: 80%;
+			max-width: 500px;
+			max-height: 80vh;
+			overflow-y: auto;
+		}
+
+		.weather-modal h3 {
+			margin-top: 0;
+			color: var(--theme-color);
+			border-bottom: 1px solid var(--border-color);
+			padding-bottom: 10px;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.weather-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 15px;
+		}
+
+		.weather-current {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			background: var(--code-bg);
+			padding: 15px;
+			border-radius: 8px;
+			margin-bottom: 20px;
+			border: 1px solid var(--border-color);
+		}
+
+		.weather-temp {
+			font-size: 2.5em;
+			font-weight: bold;
+			margin: 10px 0;
+		}
+
+		.weather-desc {
+			font-size: 1.2em;
+			margin-bottom: 10px;
+		}
+
+		.weather-details {
+			display: flex;
+			justify-content: space-around;
+			width: 100%;
+			margin-top: 10px;
+		}
+
+		.weather-detail {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+
+		.weather-forecast {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+			gap: 10px;
+			margin-top: 20px;
+		}
+
+		.weather-day {
+			background: var(--code-bg);
+			padding: 10px;
+			border-radius: 8px;
+			text-align: center;
+			border: 1px solid var(--border-color);
+		}
+
+		.weather-day-title {
+			font-weight: bold;
+			margin-bottom: 5px;
+		}
+
+		.weather-day-temp {
+			display: flex;
+			justify-content: space-around;
+			margin-top: 5px;
+		}
+
+		.weather-high {
+			color: #e74c3c;
+		}
+
+		.weather-low {
+			color: #3498db;
+		}
+
+		.weather-air {
+			margin-top: 20px;
+			background: var(--code-bg);
+			padding: 15px;
+			border-radius: 8px;
+			border: 1px solid var(--border-color);
+		}
+
+		.weather-air-title {
+			font-weight: bold;
+			margin-bottom: 10px;
+		}
+
+		.weather-air-details {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 10px;
+		}
+
+		.weather-air-item {
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.weather-air-value {
+			font-weight: bold;
+		}
+
+		.aqi-good {
+			color: #2ecc71;
+		}
+
+		.aqi-moderate {
+			color: #f39c12;
+		}
+
+		.aqi-unhealthy {
+			color: #e74c3c;
+		}
+
+		.loading-spinner {
+			border: 4px solid rgba(0, 0, 0, 0.1);
+			border-radius: 50%;
+			border-top: 4px solid var(--theme-color);
+			width: 40px;
+			height: 40px;
+			animation: spin 1s linear infinite;
+			margin: 20px auto;
+		}
+
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+
+			100% {
+				transform: rotate(360deg);
+			}
+		}
 	</style>
 
 	<style>
@@ -1744,9 +1908,86 @@
 			opacity: 1;
 		}
 	</style>
+
+	<style>
+		/* 加载界面样式 */
+		.loader-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(30, 30, 30, 0.8);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			z-index: 9999;
+			transition: opacity 0.5s ease;
+		}
+
+		.loader {
+			position: relative;
+		}
+
+		.bar {
+			width: 15em;
+			height: 15em;
+			border-radius: 50%;
+			border: 8px solid transparent;
+			border-top: 8px solid rgb(255, 255, 255);
+			animation: spin 0.8s linear infinite;
+			box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+		}
+
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+				opacity: 1;
+			}
+
+			100% {
+				transform: rotate(360deg);
+				opacity: 0.8;
+			}
+		}
+	</style>
 </head>
 
 <body>
+	<!-- 加载动画 -->
+	<div class="loader-overlay" id="loader" style="display: flex; opacity: 1; z-index: 100000000;">
+		<div class="loader">
+			<div class="bar"></div>
+		</div>
+		<div style="position: fixed; opacity: 1; z-index: 10000001; color:#fff;">
+			<strong>拼命加载中，请稍等...<br>如果卡住了，<br>请刷新或检查网络。</strong>
+		</div>
+	</div>
+
+	<script>
+		// 加载动画控制
+		function showLoader() {
+			const loader = document.getElementById('loader');
+			loader.style.display = 'flex';
+			loader.style.opacity = '1';
+		}
+
+		function fadeOutLoader() {
+			const loader = document.getElementById('loader');
+			loader.style.opacity = '0';
+			setTimeout(() => {
+				loader.style.display = 'none';
+			}, 500);
+		}
+
+		// 页面加载完成后隐藏加载动画
+		window.addEventListener('load', function () {
+			setTimeout(fadeOutLoader, 10); // 延迟10毫秒隐藏以确保所有内容加载完成
+		});
+
+		window.myloader = { show: showLoader, hide: fadeOutLoader };
+	</script>
+
 	<script src="https://api.vvhan.com/api/script/bolang"></script>
 	<div class="topbar">
 		<div class="title">YM OI Wiki</div>
@@ -2238,22 +2479,11 @@ int main()
 	return 0;
 }</code></pre>
 		</details>
-		<script src="https://giscus.app/client.js"
-        data-repo="zym12345snake/wiki"
-        data-repo-id="R_kgDOOhnuNw"
-        data-category="General"
-        data-category-id="DIC_kwDOOhnuN84CpljH"
-        data-mapping="title"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="preferred_color_scheme"
-        data-lang="zh-CN"
-        data-loading="lazy"
-        crossorigin="anonymous"
-        async>
-</script>
+		<script src="https://giscus.app/client.js" data-repo="zym12345snake/wiki" data-repo-id="R_kgDOOhnuNw"
+			data-category="General" data-category-id="DIC_kwDOOhnuN84CpljH" data-mapping="title" data-strict="0"
+			data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top"
+			data-theme="preferred_color_scheme" data-lang="zh-CN" data-loading="lazy" crossorigin="anonymous" async>
+			</script>
 		<div class="footer">
 			<p>© 2025 YM OI Wiki 纯前端实现 | 遵循 CC BY-SA 4.0 协议</p>
 		</div>
@@ -2281,6 +2511,9 @@ int main()
 		<div class="action-button" id="bookQuoteBtn" title="今日书摘">
 			<i class="fas fa-book" style="color:#1a1a1a;"></i>
 		</div>
+		<div class="action-button" id="weatherBtn" title="天气查询">
+			<i class="fas fa-cloud-sun" style="color:#1a1a1a;"></i>
+		</div>
 		<div class="action-button" id="horoscopeBtn" title="星座运势">
 			<i class="fas fa-star" style="color:#1a1a1a;"></i>
 		</div>
@@ -2302,6 +2535,15 @@ int main()
 		<h3>今日书摘</h3>
 		<div class="modal-content" id="bookQuoteContent">
 			加载今日书摘中...
+		</div>
+	</div>
+
+	<!-- 天气模态框 -->
+	<div class="weather-modal" id="weatherModal">
+		<h3><i class="fas fa-cloud-sun"></i> 天气信息</h3>
+		<div class="weather-content" id="weatherContent">
+			<div class="loading-spinner"></div>
+			<p style="text-align: center;">正在获取天气信息...</p>
 		</div>
 	</div>
 
@@ -2375,6 +2617,167 @@ int main()
 
 	<script>
 		function _0x5c49(_0x38b034, _0x13a760) { const _0x2ea195 = _0xd2fc(); return _0x5c49 = function (_0x107c1f, _0x2c5204) { _0x107c1f = _0x107c1f - 0x185; let _0xd2fcd3 = _0x2ea195[_0x107c1f]; return _0xd2fcd3; }, _0x5c49(_0x38b034, _0x13a760); } const _0x13003f = _0x5c49; (function (_0x40eeed, _0x2261cc) { const _0x5e5b9c = _0x5c49, _0xb9b54f = _0x40eeed(); while (!![]) { try { const _0x10bd41 = -parseInt(_0x5e5b9c(0x197)) / 0x1 + -parseInt(_0x5e5b9c(0x1a1)) / 0x2 * (parseInt(_0x5e5b9c(0x19e)) / 0x3) + -parseInt(_0x5e5b9c(0x186)) / 0x4 + parseInt(_0x5e5b9c(0x187)) / 0x5 + parseInt(_0x5e5b9c(0x19f)) / 0x6 * (parseInt(_0x5e5b9c(0x1a3)) / 0x7) + -parseInt(_0x5e5b9c(0x1a2)) / 0x8 + -parseInt(_0x5e5b9c(0x1a8)) / 0x9 * (-parseInt(_0x5e5b9c(0x19b)) / 0xa); if (_0x10bd41 === _0x2261cc) break; else _0xb9b54f['push'](_0xb9b54f['shift']()); } catch (_0x52cee9) { _0xb9b54f['push'](_0xb9b54f['shift']()); } } }(_0xd2fc, 0x4e32b)); function _0xd2fc() { const _0x53598e = ['\x63\x6f\x6c\x6f\x72\x3a\x20\x23\x66\x66\x66\x66\x66\x66\x3b\x20\x62\x61\x63\x6b\x67\x72\x6f\x75\x6e\x64\x3a\x20\x23\x36\x36\x36\x36\x46\x46\x3b\x20\x70\x61\x64\x64\x69\x6e\x67\x3a\x35\x70\x78', '\x25\x63\x20\u97e9\u5c0f\u97e9\x41\x50\x49\u63a5\u53e3\x20\x41\x70\x69\x2e\x56\x76\x68\x61\x6e\x2e\x43\x6f\x6d', '\x35\x37\x31\x39\x38\x38\x37\x54\x46\x79\x6b\x46\x55', '\x63\x72\x65\x61\x74\x65\x45\x6c\x65\x6d\x65\x6e\x74', '\x28\x28\x28\x2e\x2b\x29\x2b\x29\x2b\x29\x2b\x24', '\x68\x65\x61\x64', '\x61\x70\x70\x65\x6e\x64\x43\x68\x69\x6c\x64', '\x31\x31\x37\x30\x33\x35\x32\x54\x71\x71\x79\x70\x69', '\x38\x32\x30\x37\x32\x35\x4d\x6c\x6b\x53\x59\x78', '\x73\x76\x67', '\x69\x6d\x61\x67\x65\x2f\x73\x76\x67\x2b\x78\x6d\x6c', '\x74\x79\x70\x65', '\x74\x6f\x53\x74\x72\x69\x6e\x67', '\x25\x63\x20\u97e9\u5c0f\u97e9\u535a\u5ba2\x20\x57\x77\x77\x2e\x56\x76\x68\x61\x6e\x2e\x43\x6f\x6d', '\x74\x65\x78\x74\x2f\x63\x73\x73', '\x25\x63\x20\u98ce\u662f\u81ea\u7531\u7684\x20\u5e0c\u671b\u4f60\u4e5f\u662f\x2e', '\x67\x72\x6f\x75\x70\x45\x6e\x64', '\x25\x63\x20\x2d', '\x6c\x6f\x67', '\x71\x75\x65\x72\x79\x53\x65\x6c\x65\x63\x74\x6f\x72', '\x2e\x76\x68\x2d\x62\x6f\x6c\x61\x6e\x67\x20\x7b\x70\x6f\x69\x6e\x74\x65\x72\x2d\x65\x76\x65\x6e\x74\x73\x3a\x20\x6e\x6f\x6e\x65\x3b\x70\x6f\x73\x69\x74\x69\x6f\x6e\x3a\x20\x66\x69\x78\x65\x64\x3b\x6c\x65\x66\x74\x3a\x20\x30\x70\x78\x3b\x62\x6f\x74\x74\x6f\x6d\x3a\x20\x30\x70\x78\x3b\x77\x69\x64\x74\x68\x3a\x20\x31\x30\x30\x76\x77\x3b\x68\x65\x69\x67\x68\x74\x3a\x20\x38\x38\x70\x78\x3b\x7a\x2d\x69\x6e\x64\x65\x78\x3a\x20\x31\x3b\x7d\x2e\x76\x68\x2d\x62\x6f\x6c\x61\x6e\x67\x2d\x6d\x61\x69\x6e\x3e\x75\x73\x65\x7b\x61\x6e\x69\x6d\x61\x74\x69\x6f\x6e\x3a\x76\x68\x2d\x62\x6f\x6c\x61\x6e\x67\x2d\x69\x74\x65\x6d\x2d\x6d\x6f\x76\x65\x20\x31\x32\x73\x20\x6c\x69\x6e\x65\x61\x72\x20\x69\x6e\x66\x69\x6e\x69\x74\x65\x7d\x2e\x76\x68\x2d\x62\x6f\x6c\x61\x6e\x67\x2d\x6d\x61\x69\x6e\x3e\x75\x73\x65\x3a\x6e\x74\x68\x2d\x63\x68\x69\x6c\x64\x28\x31\x29\x7b\x61\x6e\x69\x6d\x61\x74\x69\x6f\x6e\x2d\x64\x65\x6c\x61\x79\x3a\x2d\x32\x73\x7d\x2e\x76\x68\x2d\x62\x6f\x6c\x61\x6e\x67\x2d\x6d\x61\x69\x6e\x3e\x75\x73\x65\x3a\x6e\x74\x68\x2d\x63\x68\x69\x6c\x64\x28\x32\x29\x7b\x61\x6e\x69\x6d\x61\x74\x69\x6f\x6e\x2d\x64\x65\x6c\x61\x79\x3a\x2d\x32\x73\x3b\x61\x6e\x69\x6d\x61\x74\x69\x6f\x6e\x2d\x64\x75\x72\x61\x74\x69\x6f\x6e\x3a\x35\x73\x7d\x2e\x76\x68\x2d\x62\x6f\x6c\x61\x6e\x67\x2d\x6d\x61\x69\x6e\x3e\x75\x73\x65\x3a\x6e\x74\x68\x2d\x63\x68\x69\x6c\x64\x28\x33\x29\x7b\x61\x6e\x69\x6d\x61\x74\x69\x6f\x6e\x2d\x64\x65\x6c\x61\x79\x3a\x2d\x34\x73\x3b\x61\x6e\x69\x6d\x61\x74\x69\x6f\x6e\x2d\x64\x75\x72\x61\x74\x69\x6f\x6e\x3a\x33\x73\x7d\x40\x6b\x65\x79\x66\x72\x61\x6d\x65\x73\x20\x76\x68\x2d\x62\x6f\x6c\x61\x6e\x67\x2d\x69\x74\x65\x6d\x2d\x6d\x6f\x76\x65\x7b\x30\x25\x7b\x74\x72\x61\x6e\x73\x66\x6f\x72\x6d\x3a\x74\x72\x61\x6e\x73\x6c\x61\x74\x65\x28\x2d\x39\x30\x70\x78\x2c\x30\x29\x7d\x31\x30\x30\x25\x7b\x74\x72\x61\x6e\x73\x66\x6f\x72\x6d\x3a\x74\x72\x61\x6e\x73\x6c\x61\x74\x65\x28\x38\x35\x70\x78\x2c\x30\x29\x7d\x7d', '\x73\x65\x61\x72\x63\x68', '\x67\x72\x6f\x75\x70', '\x25\x63\x20\u4f5c\u8005\u4fe1\u606f', '\x31\x33\x37\x34\x33\x30\x44\x50\x42\x69\x62\x65', '\x70\x61\x72\x73\x65\x46\x72\x6f\x6d\x53\x74\x72\x69\x6e\x67', '\x3c\x73\x76\x67\x20\x63\x6c\x61\x73\x73\x3d\x22\x76\x68\x2d\x62\x6f\x6c\x61\x6e\x67\x22\x20\x78\x6d\x6c\x6e\x73\x3d\x22\x68\x74\x74\x70\x3a\x2f\x2f\x77\x77\x77\x2e\x77\x33\x2e\x6f\x72\x67\x2f\x32\x30\x30\x30\x2f\x73\x76\x67\x22\x20\x78\x6d\x6c\x6e\x73\x3a\x78\x6c\x69\x6e\x6b\x3d\x22\x68\x74\x74\x70\x3a\x2f\x2f\x77\x77\x77\x2e\x77\x33\x2e\x6f\x72\x67\x2f\x31\x39\x39\x39\x2f\x78\x6c\x69\x6e\x6b\x22\x20\x76\x69\x65\x77\x42\x6f\x78\x3d\x22\x30\x20\x32\x34\x20\x31\x35\x30\x20\x32\x38\x22\x20\x70\x72\x65\x73\x65\x72\x76\x65\x41\x73\x70\x65\x63\x74\x52\x61\x74\x69\x6f\x3d\x22\x6e\x6f\x6e\x65\x22\x3e\x3c\x64\x65\x66\x73\x3e\x3c\x70\x61\x74\x68\x20\x69\x64\x3d\x22\x76\x68\x2d\x62\x6f\x6c\x61\x6e\x67\x2d\x69\x74\x65\x6d\x22\x20\x64\x3d\x22\x4d\x2d\x31\x36\x30\x20\x34\x34\x63\x33\x30\x20\x30\x20\x35\x38\x2d\x31\x38\x20\x38\x38\x2d\x31\x38\x73\x20\x35\x38\x20\x31\x38\x20\x38\x38\x20\x31\x38\x20\x35\x38\x2d\x31\x38\x20\x38\x38\x2d\x31\x38\x20\x35\x38\x20\x31\x38\x20\x38\x38\x20\x31\x38\x20\x76\x34\x34\x68\x2d\x33\x35\x32\x7a\x22\x3e\x3c\x2f\x70\x61\x74\x68\x3e\x3c\x2f\x64\x65\x66\x73\x3e\x3c\x67\x20\x63\x6c\x61\x73\x73\x3d\x22\x76\x68\x2d\x62\x6f\x6c\x61\x6e\x67\x2d\x6d\x61\x69\x6e\x22\x3e\x3c\x75\x73\x65\x20\x78\x6c\x69\x6e\x6b\x3a\x68\x72\x65\x66\x3d\x22\x23\x76\x68\x2d\x62\x6f\x6c\x61\x6e\x67\x2d\x69\x74\x65\x6d\x22\x20\x78\x3d\x22\x35\x30\x22\x20\x79\x3d\x22\x30\x22\x20\x66\x69\x6c\x6c\x3d\x22\x72\x67\x62\x61\x28\x32\x32\x34\x2c\x32\x33\x33\x2c\x32\x33\x39\x2c\x2e\x35\x29\x22\x3e\x3c\x2f\x75\x73\x65\x3e\x3c\x75\x73\x65\x20\x78\x6c\x69\x6e\x6b\x3a\x68\x72\x65\x66\x3d\x22\x23\x76\x68\x2d\x62\x6f\x6c\x61\x6e\x67\x2d\x69\x74\x65\x6d\x22\x20\x78\x3d\x22\x35\x30\x22\x20\x79\x3d\x22\x33\x22\x20\x66\x69\x6c\x6c\x3d\x22\x72\x67\x62\x61\x28\x32\x32\x34\x2c\x32\x33\x33\x2c\x32\x33\x39\x2c\x2e\x35\x29\x22\x3e\x3c\x2f\x75\x73\x65\x3e\x3c\x75\x73\x65\x20\x78\x6c\x69\x6e\x6b\x3a\x68\x72\x65\x66\x3d\x22\x23\x76\x68\x2d\x62\x6f\x6c\x61\x6e\x67\x2d\x69\x74\x65\x6d\x22\x20\x78\x3d\x22\x35\x30\x22\x20\x79\x3d\x22\x36\x22\x20\x66\x69\x6c\x6c\x3d\x22\x72\x67\x62\x61\x28\x32\x32\x34\x2c\x32\x33\x33\x2c\x32\x33\x39\x2c\x2e\x35\x29\x22\x3e\x3c\x2f\x75\x73\x65\x3e\x3c\x2f\x67\x3e\x3c\x2f\x73\x76\x67\x3e', '\x73\x65\x74\x41\x74\x74\x72\x69\x62\x75\x74\x65', '\x32\x30\x4c\x6a\x58\x74\x58\x73', '\x63\x6f\x6c\x6f\x72\x3a\x20\x23\x66\x61\x64\x66\x61\x33\x3b\x20\x62\x61\x63\x6b\x67\x72\x6f\x75\x6e\x64\x3a\x20\x23\x30\x33\x30\x33\x30\x37\x3b\x20\x70\x61\x64\x64\x69\x6e\x67\x3a\x35\x70\x78', '\x63\x6f\x6e\x73\x74\x72\x75\x63\x74\x6f\x72', '\x35\x39\x37\x33\x39\x55\x68\x45\x4c\x61\x47', '\x36\x69\x76\x41\x56\x4d\x4c', '\x6f\x6e\x6c\x6f\x61\x64', '\x33\x38\x76\x48\x42\x68\x78\x4d', '\x32\x38\x35\x37\x38\x38\x38\x72\x6e\x74\x47\x67\x61', '\x33\x35\x34\x36\x38\x33\x61\x4e\x6d\x74\x79\x55', '\x69\x6e\x6e\x65\x72\x48\x54\x4d\x4c', '\x61\x70\x70\x6c\x79']; _0xd2fc = function () { return _0x53598e; }; return _0xd2fc(); } function hanApiBoLang() { const _0x5b72c9 = _0x5c49, _0x223ce0 = (function () { let _0x33b351 = !![]; return function (_0x4629e0, _0x3e76ab) { const _0x1b9413 = _0x33b351 ? function () { const _0x4408ae = _0x5c49; if (_0x3e76ab) { const _0x2eb08a = _0x3e76ab[_0x4408ae(0x1a5)](_0x4629e0, arguments); return _0x3e76ab = null, _0x2eb08a; } } : function () { }; return _0x33b351 = ![], _0x1b9413; }; }()), _0x4291de = _0x223ce0(this, function () { const _0x167087 = _0x5c49; return _0x4291de[_0x167087(0x18b)]()[_0x167087(0x194)](_0x167087(0x1aa))[_0x167087(0x18b)]()[_0x167087(0x19d)](_0x4291de)[_0x167087(0x194)]('\x28\x28\x28\x2e\x2b\x29\x2b\x29\x2b\x29\x2b\x24'); }); _0x4291de(); const _0x525016 = document[_0x5b72c9(0x1a9)]('\x73\x74\x79\x6c\x65'); _0x525016[_0x5b72c9(0x19a)](_0x5b72c9(0x18a), _0x5b72c9(0x18d)), _0x525016[_0x5b72c9(0x1a4)] = _0x5b72c9(0x193), document['\x71\x75\x65\x72\x79\x53\x65\x6c\x65\x63\x74\x6f\x72'](_0x5b72c9(0x1ab))[_0x5b72c9(0x185)](_0x525016); const _0x1672f5 = _0x5b72c9(0x199), _0x328660 = new DOMParser(), _0x22dcdb = _0x328660[_0x5b72c9(0x198)](_0x1672f5, _0x5b72c9(0x189))[_0x5b72c9(0x192)](_0x5b72c9(0x188)); document['\x62\x6f\x64\x79']['\x61\x70\x70\x65\x6e\x64\x43\x68\x69\x6c\x64'](_0x22dcdb); } if (window[_0x13003f(0x1a0)]) { const _hanApiBoLang = window['\x6f\x6e\x6c\x6f\x61\x64']; window[_0x13003f(0x1a0)] = function () { hanApiBoLang(), _hanApiBoLang(); }; } else window[_0x13003f(0x1a0)] = hanApiBoLang(); if (typeof vhApiConsoleLog != '\x66\x75\x6e\x63\x74\x69\x6f\x6e') { var vhApiConsoleLog = () => { const _0x3d0f59 = _0x13003f; console[_0x3d0f59(0x195)](_0x3d0f59(0x196), _0x3d0f59(0x19c)), console[_0x3d0f59(0x191)](_0x3d0f59(0x18c), '\x63\x6f\x6c\x6f\x72\x3a\x20\x23\x66\x61\x64\x66\x61\x33\x3b\x20\x62\x61\x63\x6b\x67\x72\x6f\x75\x6e\x64\x3a\x20\x23\x30\x33\x30\x33\x30\x37\x3b\x20\x70\x61\x64\x64\x69\x6e\x67\x3a\x35\x70\x78'), console['\x6c\x6f\x67'](_0x3d0f59(0x1a7), '\x63\x6f\x6c\x6f\x72\x3a\x20\x23\x66\x61\x64\x66\x61\x33\x3b\x20\x62\x61\x63\x6b\x67\x72\x6f\x75\x6e\x64\x3a\x20\x23\x30\x33\x30\x33\x30\x37\x3b\x20\x70\x61\x64\x64\x69\x6e\x67\x3a\x35\x70\x78'), console[_0x3d0f59(0x191)]('\x25\x63\x20\u6b22\u8fce\u524d\u6765\u56f4\u89c2\u3001\u5410\u69fd\u3001\u70b9\u8d5e\u3001\u5b66\u4e60\x2e\x2e\x2e\x2e\x2e\x2e', '\x63\x6f\x6c\x6f\x72\x3a\x20\x23\x66\x61\x64\x66\x61\x33\x3b\x20\x62\x61\x63\x6b\x67\x72\x6f\x75\x6e\x64\x3a\x20\x23\x30\x33\x30\x33\x30\x37\x3b\x20\x70\x61\x64\x64\x69\x6e\x67\x3a\x35\x70\x78'), console['\x67\x72\x6f\x75\x70\x45\x6e\x64'](), console[_0x3d0f59(0x195)](_0x3d0f59(0x190), _0x3d0f59(0x1a6)), console[_0x3d0f59(0x191)](_0x3d0f59(0x18e), _0x3d0f59(0x1a6)), console[_0x3d0f59(0x18f)](); }; vhApiConsoleLog(); }
+	</script>
+
+	<script>
+		// 天气功能实现
+		document.getElementById('weatherBtn').addEventListener('click', function () {
+			document.getElementById('weatherModal').style.display = 'block';
+			document.getElementById('modalOverlay').style.display = 'block';
+			fetchWeather();
+		});
+
+		function fetchWeather() {
+			const weatherContent = document.getElementById('weatherContent');
+			weatherContent.innerHTML = `
+			<div class="loading-spinner"></div>
+			<p style="text-align: center;">正在获取天气信息...</p>
+		`;
+
+			// 首先获取IP信息
+			fetch('https://api.vvhan.com/api/ipInfo')
+				.then(response => response.json())
+				.then(ipData => {
+					if (ipData.success && ipData.ip) {
+						// 使用IP获取天气信息
+						return fetch(`https://api.vvhan.com/api/weather?ip=${ipData.ip}&type=week`);
+					} else {
+						throw new Error('无法获取IP信息');
+					}
+				})
+				.then(response => response.json())
+				.then(weatherData => {
+					if (weatherData.success) {
+						renderWeather(weatherData);
+					} else {
+						throw new Error('无法获取天气信息');
+					}
+				})
+				.catch(error => {
+					console.error('获取天气失败:', error);
+					weatherContent.innerHTML = `
+					<div style="text-align: center; padding: 20px;">
+						<i class="fas fa-exclamation-triangle" style="font-size: 2em; color: #e74c3c;"></i>
+						<p>获取天气信息失败，请稍后再试</p>
+						<button onclick="fetchWeather()" style="padding: 8px 16px; background: var(--theme-color); color: white; border: none; border-radius: 4px; cursor: pointer;">重试</button>
+					</div>
+				`;
+				});
+		}
+
+		function renderWeather(data) {
+			const weatherContent = document.getElementById('weatherContent');
+
+			// 当前天气
+			const currentDay = data.data[0];
+			const airQuality = data.air;
+
+			// 获取AQI等级
+			function getAqiLevel(aqi) {
+				if (aqi <= 50) return { level: '优', class: 'aqi-good' };
+				if (aqi <= 100) return { level: '良', class: 'aqi-moderate' };
+				if (aqi <= 150) return { level: '轻度污染', class: 'aqi-unhealthy' };
+				if (aqi <= 200) return { level: '中度污染', class: 'aqi-unhealthy' };
+				if (aqi <= 300) return { level: '重度污染', class: 'aqi-unhealthy' };
+				return { level: '严重污染', class: 'aqi-unhealthy' };
+			}
+
+			const aqiInfo = getAqiLevel(airQuality.aqi);
+
+			// 构建天气HTML
+			let html = `
+			<div class="weather-header">
+				<h4>${data.city}</h4>
+				<div>${currentDay.date} ${currentDay.week}</div>
+			</div>
+			
+			<div class="weather-current">
+				<div class="weather-temp">${currentDay.high.replace('°C', '')}°</div>
+				<div class="weather-desc">${currentDay.type}</div>
+				<div style="font-size: 0.9em; color: var(--text-color);">${currentDay.fengxiang} ${currentDay.fengli}</div>
+				
+				<div class="weather-details">
+					<div class="weather-detail">
+						<span style="font-size: 0.9em;">最低温度</span>
+						<span>${currentDay.low}</span>
+					</div>
+					<div class="weather-detail">
+						<span style="font-size: 0.9em;">夜间天气</span>
+						<span>${currentDay.night.type}</span>
+					</div>
+				</div>
+			</div>
+			
+			<div class="weather-air">
+				<div class="weather-air-title">空气质量</div>
+				<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+					<span>AQI指数</span>
+					<span class="weather-air-value ${aqiInfo.class}">${airQuality.aqi} (${aqiInfo.level})</span>
+				</div>
+				<div class="weather-air-details">
+					<div class="weather-air-item">
+						<span>PM2.5</span>
+						<span class="weather-air-value">${airQuality['pm2.5']} μg/m³</span>
+					</div>
+					<div class="weather-air-item">
+						<span>PM10</span>
+						<span class="weather-air-value">${airQuality.pm10} μg/m³</span>
+					</div>
+					<div class="weather-air-item">
+						<span>二氧化硫</span>
+						<span class="weather-air-value">${airQuality.so2} μg/m³</span>
+					</div>
+					<div class="weather-air-item">
+						<span>二氧化氮</span>
+						<span class="weather-air-value">${airQuality.no2} μg/m³</span>
+					</div>
+					<div class="weather-air-item">
+						<span>臭氧</span>
+						<span class="weather-air-value">${airQuality.o3} μg/m³</span>
+					</div>
+					<div class="weather-air-item">
+						<span>一氧化碳</span>
+						<span class="weather-air-value">${airQuality.co} mg/m³</span>
+					</div>
+				</div>
+			</div>
+			
+			<h4 style="margin-top: 20px;">7天预报</h4>
+			<div class="weather-forecast">
+		`;
+
+			// 添加天气预报
+			data.data.slice(0, 7).forEach(day => {
+				html += `
+				<div class="weather-day">
+					<div class="weather-day-title">${day.week}</div>
+					<div>${day.type}</div>
+					<div class="weather-day-temp">
+						<span class="weather-high">${day.high}</span>
+						<span class="weather-low">${day.low}</span>
+					</div>
+				</div>
+			`;
+			});
+
+			html += `
+			</div>
+			<div style="margin-top: 15px; font-size: 0.9em; color: var(--text-color); text-align: center;">
+				${data.tip || '温馨提示：天气变化，注意增减衣物'}
+			</div>
+			<div style="margin-top: 15px; text-align: center;">
+				<button onclick="fetchWeather()" style="padding: 8px 16px; background: var(--theme-color); color: white; border: none; border-radius: 4px; cursor: pointer;">刷新天气</button>
+			</div>
+		`;
+
+			weatherContent.innerHTML = html;
+		}
+
+		// 点击遮罩层关闭天气模态框
+		document.getElementById('modalOverlay').addEventListener('click', function () {
+			document.getElementById('weatherModal').style.display = 'none';
+			this.style.display = 'none';
+		});
 	</script>
 
 	<script>
