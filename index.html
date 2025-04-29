@@ -3447,7 +3447,7 @@ int main()
 				// 添加点击事件
 				copyButton.addEventListener('click', () => {
 					// 检查开发者模式
-					if (localStorage.getItem('safeMode') === '0') {
+					if (localStorage.getItem('safeMode') === '1') {
 						// 开发者模式 - 允许复制
 						navigator.clipboard.writeText(codeBlock.textContent).then(() => {
 							copyButton.innerHTML = '<i class="fas fa-check"></i> 已复制';
